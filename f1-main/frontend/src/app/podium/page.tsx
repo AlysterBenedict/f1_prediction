@@ -80,14 +80,77 @@ export default function PodiumPrediction() {
     }
   };
 
+  const customSelectStyles = {
+    control: (provided: any) => ({
+      ...provided,
+      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+      backdropFilter: 'blur(10px)',
+      border: '1px solid rgba(255, 255, 255, 0.2)',
+      borderRadius: '0.75rem',
+      padding: '0.5rem',
+      fontSize: '1.125rem',
+      fontWeight: '500',
+      color: 'white',
+      minHeight: '3.5rem',
+      boxShadow: 'none',
+      '&:hover': {
+        borderColor: 'rgba(220, 38, 38, 0.5)'
+      }
+    }),
+    menu: (provided: any) => ({
+      ...provided,
+      backgroundColor: 'rgba(0, 0, 0, 0.95)',
+      backdropFilter: 'blur(20px)',
+      border: '1px solid rgba(255, 255, 255, 0.2)',
+      borderRadius: '0.75rem'
+    }),
+    option: (provided: any, state: any) => ({
+      ...provided,
+      backgroundColor: state.isSelected ? 'rgba(220, 38, 38, 0.8)' : state.isFocused ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+      color: 'white',
+      fontWeight: '500',
+      '&:hover': {
+        backgroundColor: 'rgba(220, 38, 38, 0.5)'
+      }
+    }),
+    singleValue: (provided: any) => ({
+      ...provided,
+      color: 'white'
+    }),
+    placeholder: (provided: any) => ({
+      ...provided,
+      color: 'rgba(255, 255, 255, 0.5)'
+    }),
+    input: (provided: any) => ({
+      ...provided,
+      color: 'white'
+    })
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 to-gray-200">
-      <div className="container mx-auto px-6 py-12">
-        <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-black relative overflow-hidden">
+      {/* Animated Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-900">
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-red-600 rounded-full filter blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-white rounded-full filter blur-3xl animate-pulse" style={{animationDelay: '1.5s'}}></div>
+        </div>
+      </div>
+
+      {/* Background Image */}
+      <div 
+        className="absolute inset-0 opacity-10 bg-cover bg-center"
+        style={{
+          backgroundImage: "url('https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?w=1920&h=1080&fit=crop')"
+        }}
+      ></div>
+
+      <div className="relative z-10 container mx-auto px-6 py-12">
+        <div className="max-w-5xl mx-auto">
           {/* Header */}
           <div className="mb-8">
-            <Link href="/" className="inline-flex items-center text-black hover:text-gray-700 font-semibold text-lg transition-colors">
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <Link href="/" className="inline-flex items-center text-white hover:text-red-500 font-bold text-lg transition-colors group">
+              <svg className="w-5 h-5 mr-2 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
               Back to Home
@@ -95,111 +158,64 @@ export default function PodiumPrediction() {
           </div>
 
           {/* Main Content */}
-          <div className="bg-white rounded-2xl shadow-2xl p-10 border border-gray-300">
+          <div className="backdrop-blur-xl bg-white/10 rounded-3xl shadow-2xl p-10 border border-white/20">
             {/* Title */}
             <div className="text-center mb-12">
-              <h1 className="text-5xl font-bold text-black mb-4 tracking-tight">
-                Podium Prediction
+              <div className="inline-block mb-6">
+                <div className="w-20 h-20 bg-gradient-to-br from-red-600 to-red-800 rounded-2xl flex items-center justify-center shadow-lg shadow-red-600/50">
+                  <span className="text-white text-4xl">🏆</span>
+                </div>
+              </div>
+              <h1 className="text-6xl font-black text-white mb-4 tracking-tighter">
+                PODIUM PREDICTION
               </h1>
-              <div className="w-24 h-1 bg-black mx-auto rounded-full"></div>
+              <div className="w-32 h-1 bg-gradient-to-r from-red-600 to-white mx-auto rounded-full"></div>
             </div>
 
             {/* Prediction Form */}
             <div className="mb-12">
               <div className="text-center mb-10">
-                <h2 className="text-3xl font-bold text-black mb-3">
-                  Race Prediction Tool
+                <h2 className="text-3xl font-black text-white mb-3 tracking-tight">
+                  RACE PREDICTION TOOL
                 </h2>
-                <p className="text-black text-lg font-medium">
+                <p className="text-white/70 text-lg font-medium">
                   Predict podium finishes based on driver, team, and grid position
                 </p>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-10">
-                <div className="grid lg:grid-cols-3 gap-8">
+              <form onSubmit={handleSubmit} className="space-y-8">
+                <div className="grid lg:grid-cols-3 gap-6">
                   <div className="space-y-3">
-                    <label className="block text-lg font-bold text-black">
-                      Driver
+                    <label className="block text-lg font-bold text-white">
+                      DRIVER
                     </label>
                     <Select
                       value={selectedDriver}
                       onChange={setSelectedDriver}
                       options={drivers.map(driver => ({ value: driver.driverId, label: driver.name }))}
-                      placeholder="Search and select a driver..."
+                      placeholder="Select driver..."
                       className="text-lg"
-                      styles={{
-                        control: (provided) => ({
-                          ...provided,
-                          border: '2px solid #d1d5db',
-                          borderRadius: '0.75rem',
-                          padding: '0.5rem',
-                          fontSize: '1.125rem',
-                          fontWeight: '500',
-                          backgroundColor: 'white',
-                          color: 'black',
-                          minHeight: '3.5rem'
-                        }),
-                        option: (provided, state) => ({
-                          ...provided,
-                          backgroundColor: state.isSelected ? '#000000' : state.isFocused ? '#f3f4f6' : 'white',
-                          color: state.isSelected ? 'white' : 'black',
-                          fontWeight: '500'
-                        }),
-                        singleValue: (provided) => ({
-                          ...provided,
-                          color: 'black'
-                        }),
-                        placeholder: (provided) => ({
-                          ...provided,
-                          color: '#6b7280'
-                        })
-                      }}
+                      styles={customSelectStyles}
                     />
                   </div>
 
                   <div className="space-y-3">
-                    <label className="block text-lg font-bold text-black">
-                      Constructor/Team
+                    <label className="block text-lg font-bold text-white">
+                      CONSTRUCTOR
                     </label>
                     <Select
                       value={selectedConstructor}
                       onChange={setSelectedConstructor}
                       options={constructors.map(constructor => ({ value: constructor.constructorId, label: constructor.name }))}
-                      placeholder="Search and select a constructor..."
+                      placeholder="Select team..."
                       className="text-lg"
-                      styles={{
-                        control: (provided) => ({
-                          ...provided,
-                          border: '2px solid #d1d5db',
-                          borderRadius: '0.75rem',
-                          padding: '0.5rem',
-                          fontSize: '1.125rem',
-                          fontWeight: '500',
-                          backgroundColor: 'white',
-                          color: 'black',
-                          minHeight: '3.5rem'
-                        }),
-                        option: (provided, state) => ({
-                          ...provided,
-                          backgroundColor: state.isSelected ? '#000000' : state.isFocused ? '#f3f4f6' : 'white',
-                          color: state.isSelected ? 'white' : 'black',
-                          fontWeight: '500'
-                        }),
-                        singleValue: (provided) => ({
-                          ...provided,
-                          color: 'black'
-                        }),
-                        placeholder: (provided) => ({
-                          ...provided,
-                          color: '#6b7280'
-                        })
-                      }}
+                      styles={customSelectStyles}
                     />
                   </div>
 
                   <div className="space-y-3">
-                    <label className="block text-lg font-bold text-black">
-                      Grid Position
+                    <label className="block text-lg font-bold text-white">
+                      GRID POSITION
                     </label>
                     <input
                       type="number"
@@ -207,8 +223,8 @@ export default function PodiumPrediction() {
                       max="20"
                       value={gridPosition}
                       onChange={(e) => setGridPosition(Number(e.target.value))}
-                      className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-black focus:border-black bg-white text-black font-medium text-lg transition-all"
-                      placeholder="Enter grid position"
+                      className="w-full px-6 py-4 backdrop-blur-lg bg-white/5 border border-white/20 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent text-white font-medium text-lg transition-all placeholder-white/50"
+                      placeholder="1-20"
                       required
                     />
                   </div>
@@ -218,15 +234,15 @@ export default function PodiumPrediction() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="bg-black text-white px-12 py-5 rounded-xl hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-black focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed font-bold text-xl transition-all transform hover:scale-105 shadow-lg"
+                    className="bg-gradient-to-r from-red-600 to-red-800 text-white px-12 py-5 rounded-xl hover:from-red-700 hover:to-red-900 focus:outline-none focus:ring-4 focus:ring-red-500/50 disabled:opacity-50 disabled:cursor-not-allowed font-black text-xl transition-all transform hover:scale-105 shadow-lg shadow-red-600/50"
                   >
                     {loading ? (
-                      <span className="flex items-center">
+                      <span className="flex items-center justify-center">
                         <div className="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent mr-3"></div>
-                        Predicting...
+                        ANALYZING...
                       </span>
                     ) : (
-                      'Predict Podium Finish'
+                      'PREDICT PODIUM FINISH'
                     )}
                   </button>
                 </div>
@@ -235,41 +251,53 @@ export default function PodiumPrediction() {
 
             {/* Error Message */}
             {error && (
-              <div className="mb-8 p-8 bg-red-50 border-2 border-red-300 text-red-900 rounded-xl">
+              <div className="mb-8 p-6 backdrop-blur-lg bg-red-500/20 border border-red-500/50 text-white rounded-xl">
                 <div className="flex items-center">
-                  <div className="text-3xl mr-4">❌</div>
-                  <p className="font-bold text-xl">{error}</p>
+                  <div className="text-3xl mr-4">⚠️</div>
+                  <p className="font-bold text-lg">{error}</p>
                 </div>
               </div>
             )}
 
             {/* Prediction Results */}
             {result && (
-              <div className="p-8 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border-2 border-green-300">
+              <div className="p-8 backdrop-blur-lg bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-2xl border border-green-500/50">
                 <div className="text-center mb-8">
-                  <h2 className="text-3xl font-bold text-black mb-2">Prediction Results</h2>
-                  <div className="w-16 h-1 bg-black mx-auto rounded-full"></div>
+                  <h2 className="text-4xl font-black text-white mb-2 tracking-tight">PREDICTION RESULTS</h2>
+                  <div className="w-20 h-1 bg-gradient-to-r from-green-500 to-white mx-auto rounded-full"></div>
                 </div>
 
-                <div className="space-y-6">
-                  <div className="flex justify-between items-center py-4 px-6 bg-white rounded-lg border-2 border-gray-300 shadow-sm">
-                    <span className="font-bold text-black text-xl">Podium Finish:</span>
-                    <span className={`font-black text-2xl ${result.prediction === 1 ? 'text-green-700' : 'text-red-700'}`}>
-                      {result.prediction === 1 ? 'Yes' : 'No'}
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center py-4 px-6 backdrop-blur-lg bg-white/10 rounded-xl border border-white/20">
+                    <span className="font-bold text-white text-xl tracking-tight">PODIUM FINISH</span>
+                    <span className={`font-black text-3xl ${result.prediction === 1 ? 'text-green-400' : 'text-red-400'}`}>
+                      {result.prediction === 1 ? 'YES ✓' : 'NO ✗'}
                     </span>
                   </div>
 
-                  <div className="flex justify-between items-center py-4 px-6 bg-white rounded-lg border-2 border-gray-300 shadow-sm">
-                    <span className="font-bold text-black text-xl">Podium Probability:</span>
-                    <span className="font-black text-2xl text-black">
-                      {(result.podium_probability * 100).toFixed(1)}%
-                    </span>
+                  <div className="flex justify-between items-center py-4 px-6 backdrop-blur-lg bg-white/10 rounded-xl border border-white/20">
+                    <span className="font-bold text-white text-xl tracking-tight">PROBABILITY</span>
+                    <div className="text-right">
+                      <span className="font-black text-3xl text-white">
+                        {(result.podium_probability * 100).toFixed(1)}%
+                      </span>
+                      <div className="w-full bg-white/20 rounded-full h-2 mt-2">
+                        <div 
+                          className="bg-gradient-to-r from-red-600 to-red-400 h-2 rounded-full transition-all duration-1000"
+                          style={{width: `${result.podium_probability * 100}%`}}
+                        ></div>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="flex justify-between items-center py-4 px-6 bg-white rounded-lg border-2 border-gray-300 shadow-sm">
-                    <span className="font-bold text-black text-xl">Confidence Level:</span>
-                    <span className={`font-black text-2xl ${result.confidence === 'high' ? 'text-green-700' : result.confidence === 'medium' ? 'text-yellow-700' : 'text-red-700'}`}>
-                      {result.confidence.charAt(0).toUpperCase() + result.confidence.slice(1)}
+                  <div className="flex justify-between items-center py-4 px-6 backdrop-blur-lg bg-white/10 rounded-xl border border-white/20">
+                    <span className="font-bold text-white text-xl tracking-tight">CONFIDENCE</span>
+                    <span className={`font-black text-3xl ${
+                      result.confidence === 'high' ? 'text-green-400' : 
+                      result.confidence === 'medium' ? 'text-yellow-400' : 
+                      'text-red-400'
+                    }`}>
+                      {result.confidence.toUpperCase()}
                     </span>
                   </div>
                 </div>
