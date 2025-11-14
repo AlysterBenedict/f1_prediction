@@ -1,73 +1,102 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.18);
+  /* F1 Theme - Light Mode */
+  --background: #f4f4f7; /* Light grey background */
+  --foreground: #1a1a1a; /* Dark charcoal text */
+  --card-bg: #ffffff; /* White for cards */
+  --primary: #e10600; /* F1 Red */
+  --primary-hover: #c00500; /* Darker F1 Red */
+  --border-color: #e5e7eb; /* Light grey border */
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-    --glass-bg: rgba(17, 25, 40, 0.75);
-    --glass-border: rgba(255, 255, 255, 0.125);
-  }
-}
+/* * Removed all dark mode and glassmorphism styles 
+ * to default to the new F1 Light Theme.
+ */
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
-/* Glassmorphism utility classes */
-.glass {
-  background: var(--glass-bg);
-  backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid var(--glass-border);
+/* New F1 Theme Utility Classes */
+.f1-card {
+  background: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--border-color);
+  transition: all 0.3s ease-in-out;
 }
 
-.glass-strong {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(20px) saturate(200%);
-  -webkit-backdrop-filter: blur(20px) saturate(200%);
-  border: 1px solid rgba(255, 255, 255, 0.25);
+.f1-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
 
-@media (prefers-color-scheme: dark) {
-  .glass-strong {
-    background: rgba(17, 25, 40, 0.85);
-    border: 1px solid rgba(255, 255, 255, 0.18);
-  }
+.f1-button-primary {
+  background-color: var(--primary);
+  color: #ffffff;
+  font-weight: 600;
+  padding: 12px 24px;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 4px 10px rgba(225, 6, 0, 0.2);
 }
 
-.glass-card {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(12px) saturate(180%);
-  -webkit-backdrop-filter: blur(12px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+.f1-button-primary:hover {
+  background-color: var(--primary-hover);
 }
 
-@media (prefers-color-scheme: dark) {
-  .glass-card {
-    background: rgba(17, 25, 40, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-  }
+.f1-button-primary:disabled {
+  background-color: #999;
+  opacity: 0.7;
+  cursor: not-allowed;
+  box-shadow: none;
 }
 
-/* Smooth animations */
+.f1-button-secondary {
+  background-color: var(--card-bg);
+  color: var(--primary);
+  font-weight: 600;
+  padding: 12px 24px;
+  border-radius: 8px;
+  border: 2px solid var(--primary);
+  transition: all 0.3s ease;
+}
+
+.f1-button-secondary:hover {
+  background-color: var(--primary);
+  color: #ffffff;
+}
+
+/* Page Header Style */
+.f1-page-header {
+  background-color: var(--card-bg);
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+}
+
+/* Input Styles */
+.f1-input, .f1-select-control {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  background-color: #ffffff;
+  color: var(--foreground);
+  font-weight: 500;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.f1-input:focus, .f1-select-control:focus-within {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(225, 6, 0, 0.15);
+}
+
+/* Animations from old file */
 @keyframes float {
   0%, 100% {
     transform: translateY(0px);

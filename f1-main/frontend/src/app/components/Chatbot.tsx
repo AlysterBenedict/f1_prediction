@@ -10,7 +10,7 @@ interface Message {
 const Chatbot: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
-    { role: 'bot', content: "Hi! I'm the F1 Predictor Bot. Ask me about podiums or championships!" }
+    { role: 'bot', content: "Hi! I'm F1 Gridflow AI. Ask me anything about F1!" }
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -83,7 +83,7 @@ const Chatbot: React.FC = () => {
         <button
           onClick={() => setIsOpen(true)}
           className="chat-popup-button"
-          title="Open F1 Chat Assistant"
+          title="Open F1 gridflow ai"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -106,7 +106,7 @@ const Chatbot: React.FC = () => {
         <div className="chat-window">
           {/* Header with Gradient */}
           <div className="chat-header">
-            <h3>F1 Chat Assistant</h3>
+            <h3>F1 Gridflow AI</h3>
             <button onClick={() => setIsOpen(false)} title="Close Chat">
               ×
             </button>

@@ -29,6 +29,7 @@ ChartJS.register(
   Legend
 );
 
+// (Interfaces would be here, same as before)
 interface DriverPerformance {
   year: number;
   driverId: number;
@@ -78,6 +79,32 @@ interface PredictionData {
   note?: string;
 }
 
+// New React-Select styles for the F1 theme
+const f1SelectStyles = {
+  control: (base) => ({
+    ...base,
+    borderColor: 'var(--border-color)',
+    '&:hover': { borderColor: '#9ca3af' },
+    boxShadow: 'none',
+    borderRadius: '0.5rem',
+    minHeight: '42px',
+  }),
+  option: (base, state) => ({
+    ...base,
+    backgroundColor: state.isSelected ? 'var(--primary)' : state.isFocused ? '#fdecec' : 'white',
+    color: state.isSelected ? 'white' : 'black'
+  }),
+  multiValue: (base) => ({
+    ...base,
+    backgroundColor: '#fdecec',
+  }),
+  multiValueLabel: (base) => ({
+    ...base,
+    color: 'var(--primary)',
+  }),
+};
+
+
 export default function AnalyticsDashboard() {
   const router = useRouter();
 
@@ -101,7 +128,7 @@ export default function AnalyticsDashboard() {
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const [autoRefresh, setAutoRefresh] = useState(true);
 
-
+  // ... (All fetch functions remain the same)
   useEffect(() => {
     fetchAnalyticsData();
     fetchDriversAndTeams();
@@ -241,7 +268,26 @@ export default function AnalyticsDashboard() {
     setLastUpdated(new Date());
   };
 
-  // Prepare driver performance chart data
+  // ... (getAggregatedData function remains the same)
+  const getAggregatedData = (data, idField, nameField, valueField) => {
+    const aggregation = new Map();
+    for (const item of data) {
+      const id = item[idField];
+      const name = item[nameField] || item['driver_name'];
+      const value = item[valueField];
+      if (id === undefined || name === undefined || typeof value !== 'number') continue;
+      if (!aggregation.has(id)) {
+        aggregation.set(id, { name: name, totalValue: 0 });
+      }
+      aggregation.get(id).totalValue += value;
+    }
+    return Array.from(aggregation.values())
+      .sort((a, b) => b.totalValue - a.totalValue)
+      .slice(0, 5);
+  };
+
+
+  // Prepare driver performance chart data (F1 THEME)
   const driverChartData = {
     labels: selectedDriver
       ? driverPerformance.map(d => d.year).sort()
@@ -259,18 +305,20 @@ export default function AnalyticsDashboard() {
                 .reduce((sum, d) => sum + d.points, 0) /
               driverPerformance.filter(d => d.year === year).length
             ),
-        borderColor: 'rgb(0, 0, 0)',
-        backgroundColor: 'rgba(0, 0, 0, 0.1)',
+        borderColor: 'var(--primary)',
+        backgroundColor: 'rgba(225, 6, 0, 0.1)',
         borderWidth: 3,
-        pointBackgroundColor: 'rgb(0, 0, 0)',
-        pointBorderColor: 'rgb(0, 0, 0)',
+        pointBackgroundColor: 'var(--primary)',
+        pointBorderColor: '#fff',
         pointBorderWidth: 2,
         pointRadius: 6,
+        fill: true,
+        tension: 0.1
       },
     ],
   };
 
-  // Prepare team standings chart data
+  // Prepare team standings chart data (F1 THEME)
   const teamChartData = {
     labels: selectedTeam
       ? teamStandings.map(t => t.year).sort()
@@ -287,8 +335,8 @@ export default function AnalyticsDashboard() {
                 .filter(t => t.year === year)
                 .reduce((sum, t) => sum + t.points, 0)
             ),
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        borderColor: 'rgb(0, 0, 0)',
+        backgroundColor: 'rgba(225, 6, 0, 0.8)',
+        borderColor: 'var(--primary)',
         borderWidth: 2,
         borderRadius: 4,
         borderSkipped: false,
@@ -296,7 +344,7 @@ export default function AnalyticsDashboard() {
     ],
   };
 
-  // Prepare podium frequency chart data
+  // Prepare podium frequency chart data (F1 THEME)
   const podiumChartData = {
     labels: selectedDriver
       ? podiumData.map(p => p.year).sort()
@@ -313,22 +361,72 @@ export default function AnalyticsDashboard() {
                 .filter(p => p.year === year)
                 .reduce((sum, p) => sum + p.podiums, 0)
             ),
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        borderColor: 'rgb(0, 0, 0)',
+        backgroundColor: 'rgba(29, 29, 31, 0.8)', // Using charcoal for variety
+        borderColor: '#1d1d1f',
         borderWidth: 2,
         borderRadius: 4,
         borderSkipped: false,
       },
     ],
   };
+  
+  // New Chart Options for Light Theme
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top' as const,
+        labels: {
+          color: '#333',
+          font: {
+            size: 14,
+            weight: '600'
+          }
+        }
+      },
+      title: {
+        display: true,
+        color: '#1a1a1a',
+        font: {
+          size: 18,
+          weight: 'bold'
+        }
+      },
+    },
+    scales: {
+      x: {
+        ticks: {
+          color: '#333',
+          font: {
+            weight: 'bold'
+          }
+        },
+        grid: {
+          color: 'rgba(0, 0, 0, 0.05)'
+        }
+      },
+      y: {
+        ticks: {
+          color: '#333',
+          font: {
+            weight: 'bold'
+          }
+        },
+        grid: {
+          color: 'rgba(0, 0, 0, 0.05)'
+        }
+      }
+    }
+  };
 
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-100 to-gray-200 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-20 w-20 border-4 border-black border-t-transparent mx-auto mb-6"></div>
-          <p className="text-black font-semibold text-xl">Loading analytics data...</p>
+          <div className="animate-spin rounded-full h-20 w-20 border-4 border-red-600 border-t-transparent mx-auto mb-6"></div>
+          <p className="text-neutral-800 font-semibold text-xl">Loading analytics data...</p>
         </div>
       </div>
     );
@@ -336,12 +434,12 @@ export default function AnalyticsDashboard() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-100 to-gray-200 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="text-6xl mb-4">⚠️</div>
-          <p className="text-black font-bold text-xl mb-6">{error}</p>
-          <Link href="/" className="inline-flex items-center bg-black text-white px-8 py-4 rounded-xl hover:bg-gray-800 font-bold text-lg transition-all">
-            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <p className="text-neutral-900 font-bold text-xl mb-6">{error}</p>
+          <Link href="/" className="f1-button-primary">
+            <svg className="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
             Back to Home
@@ -352,12 +450,12 @@ export default function AnalyticsDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 to-gray-200">
+    <div className="min-h-screen">
       <div className="container mx-auto px-6 py-12">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-8">
-            <Link href="/" className="inline-flex items-center text-black hover:text-gray-700 font-semibold text-lg transition-colors">
+            <Link href="/" className="inline-flex items-center text-neutral-800 hover:text-red-600 font-semibold text-lg transition-colors">
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
@@ -366,10 +464,10 @@ export default function AnalyticsDashboard() {
           </div>
 
           {/* Filters Section */}
-          <div className="mb-8 bg-white rounded-2xl shadow-lg p-6 border border-gray-300">
+          <div className="mb-8 bg-white rounded-xl shadow-md p-6 border border-gray-200">
             <div className="flex flex-col lg:flex-row gap-6 items-start lg:items-end">
               <div className="flex-1">
-                <label className="block text-sm font-semibold text-black mb-2">
+                <label className="block text-sm font-semibold text-neutral-900 mb-2">
                   Filter by Driver
                 </label>
                 <Select
@@ -378,26 +476,13 @@ export default function AnalyticsDashboard() {
                   options={drivers}
                   isClearable
                   placeholder="Search and select a driver..."
-                  className="text-black"
-                  styles={{
-                    control: (base) => ({
-                      ...base,
-                      borderColor: '#d1d5db',
-                      '&:hover': { borderColor: '#9ca3af' },
-                      boxShadow: 'none',
-                      borderRadius: '0.5rem'
-                    }),
-                    option: (base, state) => ({
-                      ...base,
-                      backgroundColor: state.isSelected ? '#000' : state.isFocused ? '#f3f4f6' : 'white',
-                      color: state.isSelected ? 'white' : 'black'
-                    })
-                  }}
+                  className="text-neutral-900"
+                  styles={f1SelectStyles}
                 />
               </div>
 
               <div className="flex-1">
-                <label className="block text-sm font-semibold text-black mb-2">
+                <label className="block text-sm font-semibold text-neutral-900 mb-2">
                   Filter by Team
                 </label>
                 <Select
@@ -406,28 +491,15 @@ export default function AnalyticsDashboard() {
                   options={teams}
                   isClearable
                   placeholder="Search and select a team..."
-                  className="text-black"
-                  styles={{
-                    control: (base) => ({
-                      ...base,
-                      borderColor: '#d1d5db',
-                      '&:hover': { borderColor: '#9ca3af' },
-                      boxShadow: 'none',
-                      borderRadius: '0.5rem'
-                    }),
-                    option: (base, state) => ({
-                      ...base,
-                      backgroundColor: state.isSelected ? '#000' : state.isFocused ? '#f3f4f6' : 'white',
-                      color: state.isSelected ? 'white' : 'black'
-                    })
-                  }}
+                  className="text-neutral-900"
+                  styles={f1SelectStyles}
                 />
               </div>
 
               <div className="flex gap-2">
                 <button
                   onClick={handleRefresh}
-                  className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors font-semibold"
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-semibold"
                   disabled={loading}
                 >
                   {loading ? 'Refreshing...' : 'Refresh'}
@@ -437,7 +509,7 @@ export default function AnalyticsDashboard() {
                   className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
                     autoRefresh
                       ? 'bg-green-600 text-white hover:bg-green-700'
-                      : 'bg-gray-300 text-black hover:bg-gray-400'
+                      : 'bg-gray-300 text-neutral-800 hover:bg-gray-400'
                   }`}
                 >
                   Auto: {autoRefresh ? 'ON' : 'OFF'}
@@ -450,51 +522,51 @@ export default function AnalyticsDashboard() {
             </div>
           </div>
 
-          {/* Main Content */}
-          <div className="bg-white rounded-2xl shadow-2xl p-10 border border-gray-300">
+          {/* Main Content Card */}
+          <div className="f1-card p-10">
             {/* Title */}
             <div className="text-center mb-12">
-              <h1 className="text-5xl font-bold text-black mb-4 tracking-tight">
+              <h1 className="text-5xl font-bold text-neutral-900 mb-4 tracking-tight">
                 F1 Analytics Dashboard
               </h1>
-              <div className="w-24 h-1 bg-black mx-auto rounded-full"></div>
+              <div className="w-24 h-1 bg-red-600 mx-auto rounded-full"></div>
             </div>
 
-            {/* Predictions Section */}
+            {/* Predictions Section (F1 RED THEME) */}
             {(predictions && !predictionLoading) && (
-              <div className="mb-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-200">
+              <div className="mb-8 bg-gradient-to-r from-red-50 to-red-100 rounded-2xl p-6 border border-red-200">
                 <div className="flex items-center mb-4">
-                  <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center mr-3">
+                  <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center mr-3">
                     <span className="text-white text-lg">🔮</span>
                   </div>
-                  <h3 className="text-xl font-bold text-blue-900">
+                  <h3 className="text-xl font-bold text-red-900">
                     {predictions.driver_name || predictions.constructor_name} - {new Date().getFullYear() + 1} Predictions
                   </h3>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="bg-white p-4 rounded-lg border border-blue-300">
-                    <div className="text-sm text-blue-600 font-semibold">Predicted Points</div>
-                    <div className="text-2xl font-bold text-blue-900">{predictions.predictions.points}</div>
+                  <div className="bg-white p-4 rounded-lg border border-red-200">
+                    <div className="text-sm text-red-800 font-semibold">Predicted Points</div>
+                    <div className="text-2xl font-bold text-red-900">{predictions.predictions.points}</div>
                   </div>
 
                   {predictions.predictions.podium_probability && (
-                    <div className="bg-white p-4 rounded-lg border border-blue-300">
-                      <div className="text-sm text-blue-600 font-semibold">Podium Probability</div>
-                      <div className="text-2xl font-bold text-blue-900">{(predictions.predictions.podium_probability * 100).toFixed(1)}%</div>
+                    <div className="bg-white p-4 rounded-lg border border-red-200">
+                      <div className="text-sm text-red-800 font-semibold">Podium Probability</div>
+                      <div className="text-2xl font-bold text-red-900">{(predictions.predictions.podium_probability * 100).toFixed(1)}%</div>
                     </div>
                   )}
 
-                  <div className="bg-white p-4 rounded-lg border border-blue-300">
-                    <div className="text-sm text-blue-600 font-semibold">Championship Probability</div>
-                    <div className="text-2xl font-bold text-blue-900">{(predictions.predictions.championship_probability * 100).toFixed(1)}%</div>
+                  <div className="bg-white p-4 rounded-lg border border-red-200">
+                    <div className="text-sm text-red-800 font-semibold">Championship Probability</div>
+                    <div className="text-2xl font-bold text-red-900">{(predictions.predictions.championship_probability * 100).toFixed(1)}%</div>
                   </div>
                 </div>
 
-                <div className="mt-4 text-sm text-blue-700">
+                <div className="mt-4 text-sm text-red-800">
                   Confidence: <span className={`font-semibold ${
                     predictions.confidence === 'high' ? 'text-green-600' :
-                    predictions.confidence === 'medium' ? 'text-yellow-600' : 'text-red-600'
+                    predictions.confidence === 'medium' ? 'text-yellow-600' : 'text-red-700'
                   }`}>
                     {predictions.confidence.toUpperCase()}
                   </span>
@@ -507,7 +579,7 @@ export default function AnalyticsDashboard() {
             {predictionLoading && (
               <div className="mb-8 bg-gray-50 rounded-2xl p-6 border border-gray-200">
                 <div className="flex items-center">
-                  <div className="animate-spin rounded-full h-6 w-6 border-2 border-blue-600 border-t-transparent mr-3"></div>
+                  <div className="animate-spin rounded-full h-6 w-6 border-2 border-red-600 border-t-transparent mr-3"></div>
                   <span className="text-gray-700">Loading predictions...</span>
                 </div>
               </div>
@@ -517,67 +589,19 @@ export default function AnalyticsDashboard() {
             <div className="mb-16 space-y-12">
               {/* Driver Performance Chart */}
               {driverPerformance.length > 0 && (
-                <div className="bg-white p-8 rounded-xl shadow-lg border-2 border-gray-300">
+                <div className="bg-white p-8 rounded-xl shadow-lg border-2 border-gray-200">
                   <div className="flex items-center mb-6">
-                    <div className="w-12 h-12 bg-black rounded-full flex items-center justify-center mr-4">
+                    <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center mr-4">
                       <span className="text-white text-xl">👤</span>
                     </div>
-                    <h2 className="text-3xl font-bold text-black">
+                    <h2 className="text-3xl font-bold text-neutral-900">
                       {selectedDriver ? `${selectedDriver.label} Performance` : 'Driver Performance Trends'}
                     </h2>
                   </div>
                   <div className="h-96">
                     <Line
                       data={driverChartData}
-                      options={{
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                          legend: {
-                            position: 'top' as const,
-                            labels: {
-                              color: 'black',
-                              font: {
-                                size: 14,
-                                weight: 'bold'
-                              }
-                            }
-                          },
-                          title: {
-                            display: true,
-                            text: selectedDriver ? 'Points per Race by Season' : 'Average Points per Race by Season',
-                            color: 'black',
-                            font: {
-                              size: 18,
-                              weight: 'bold'
-                            }
-                          },
-                        },
-                        scales: {
-                          x: {
-                            ticks: {
-                              color: 'black',
-                              font: {
-                                weight: 'bold'
-                              }
-                            },
-                            grid: {
-                              color: 'rgba(0, 0, 0, 0.1)'
-                            }
-                          },
-                          y: {
-                            ticks: {
-                              color: 'black',
-                              font: {
-                                weight: 'bold'
-                              }
-                            },
-                            grid: {
-                              color: 'rgba(0, 0, 0, 0.1)'
-                            }
-                          }
-                        }
-                      }}
+                      options={{...chartOptions, plugins: { ...chartOptions.plugins, title: { ...chartOptions.plugins.title, text: selectedDriver ? 'Points per Race by Season' : 'Average Points per Race by Season'}}}}
                     />
                   </div>
                 </div>
@@ -585,67 +609,19 @@ export default function AnalyticsDashboard() {
 
               {/* Team Standings Chart */}
               {teamStandings.length > 0 && (
-                <div className="bg-white p-8 rounded-xl shadow-lg border-2 border-gray-300">
+                <div className="bg-white p-8 rounded-xl shadow-lg border-2 border-gray-200">
                   <div className="flex items-center mb-6">
-                    <div className="w-12 h-12 bg-black rounded-full flex items-center justify-center mr-4">
+                    <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center mr-4">
                       <span className="text-white text-xl">🏭</span>
                     </div>
-                    <h2 className="text-3xl font-bold text-black">
+                    <h2 className="text-3xl font-bold text-neutral-900">
                       {selectedTeam ? `${selectedTeam.label} Performance` : 'Constructor Performance'}
                     </h2>
                   </div>
                   <div className="h-96">
                     <Bar
                       data={teamChartData}
-                      options={{
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                          legend: {
-                            position: 'top' as const,
-                            labels: {
-                              color: 'black',
-                              font: {
-                                size: 14,
-                                weight: 'bold'
-                              }
-                            }
-                          },
-                          title: {
-                            display: true,
-                            text: selectedTeam ? 'Total Points by Season' : 'Total Constructor Points by Season',
-                            color: 'black',
-                            font: {
-                              size: 18,
-                              weight: 'bold'
-                            }
-                          },
-                        },
-                        scales: {
-                          x: {
-                            ticks: {
-                              color: 'black',
-                              font: {
-                                weight: 'bold'
-                              }
-                            },
-                            grid: {
-                              color: 'rgba(0, 0, 0, 0.1)'
-                            }
-                          },
-                          y: {
-                            ticks: {
-                              color: 'black',
-                              font: {
-                                weight: 'bold'
-                              }
-                            },
-                            grid: {
-                              color: 'rgba(0, 0, 0, 0.1)'
-                            }
-                          }
-                        }
-                      }}
+                      options={{...chartOptions, plugins: { ...chartOptions.plugins, title: { ...chartOptions.plugins.title, text: selectedTeam ? 'Total Points by Season' : 'Total Constructor Points by Season'}}}}
                     />
                   </div>
                 </div>
@@ -653,67 +629,19 @@ export default function AnalyticsDashboard() {
 
               {/* Podium Frequency Chart */}
               {podiumData.length > 0 && (
-                <div className="bg-white p-8 rounded-xl shadow-lg border-2 border-gray-300">
+                <div className="bg-white p-8 rounded-xl shadow-lg border-2 border-gray-200">
                   <div className="flex items-center mb-6">
-                    <div className="w-12 h-12 bg-black rounded-full flex items-center justify-center mr-4">
+                    <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center mr-4">
                       <span className="text-white text-xl">🏆</span>
                     </div>
-                    <h2 className="text-3xl font-bold text-black">
+                    <h2 className="text-3xl font-bold text-neutral-900">
                       {selectedDriver ? `${selectedDriver.label} Podium Achievements` : 'Podium Achievements'}
                     </h2>
                   </div>
                   <div className="h-96">
                     <Bar
                       data={podiumChartData}
-                      options={{
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                          legend: {
-                            position: 'top' as const,
-                            labels: {
-                              color: 'black',
-                              font: {
-                                size: 14,
-                                weight: 'bold'
-                              }
-                            }
-                          },
-                          title: {
-                            display: true,
-                            text: selectedDriver ? 'Podium Finishes by Season' : 'Total Podium Finishes by Season',
-                            color: 'black',
-                            font: {
-                              size: 18,
-                              weight: 'bold'
-                            }
-                          },
-                        },
-                        scales: {
-                          x: {
-                            ticks: {
-                              color: 'black',
-                              font: {
-                                weight: 'bold'
-                              }
-                            },
-                            grid: {
-                              color: 'rgba(0, 0, 0, 0.1)'
-                            }
-                          },
-                          y: {
-                            ticks: {
-                              color: 'black',
-                              font: {
-                                weight: 'bold'
-                              }
-                            },
-                            grid: {
-                              color: 'rgba(0, 0, 0, 0.1)'
-                            }
-                          }
-                        }
-                      }}
+                      options={{...chartOptions, plugins: { ...chartOptions.plugins, title: { ...chartOptions.plugins.title, text: selectedDriver ? 'Podium Finishes by Season' : 'Total Podium Finishes by Season'}}}}
                     />
                   </div>
                 </div>
@@ -724,13 +652,13 @@ export default function AnalyticsDashboard() {
             <div className="grid xl:grid-cols-3 gap-8">
               {/* Top Drivers */}
               {!selectedTeam && driverPerformance.length > 0 && (
-                <div className="bg-white p-8 rounded-xl shadow-lg border-2 border-gray-300">
+                <div className="bg-white p-8 rounded-xl shadow-lg border-2 border-gray-200">
                   <div className="flex items-center mb-6">
-                    <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center mr-3">
+                    <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center mr-3">
                       <span className="text-white text-lg">🏎️</span>
                     </div>
-                    <h3 className="text-2xl font-bold text-black">
-                      {selectedDriver ? 'Driver Performance' : 'Top Drivers'}
+                    <h3 className="text-2xl font-bold text-neutral-900">
+                      {selectedDriver ? 'Driver Performance' : 'Top Drivers (All-Time)'}
                     </h3>
                   </div>
                   <div className="space-y-4">
@@ -740,17 +668,15 @@ export default function AnalyticsDashboard() {
                           .slice(0, 5)
                           .map((driver, index) => (
                             <div key={index} className="flex justify-between items-center py-3 px-4 bg-gray-50 rounded-lg border border-gray-200">
-                              <span className="font-semibold text-black text-lg">{driver.year}</span>
-                              <span className="font-bold text-black text-lg">{driver.points.toFixed(1)} pts</span>
+                              <span className="font-semibold text-neutral-800 text-lg">{driver.year}</span>
+                              <span className="font-bold text-neutral-900 text-lg">{driver.points.toFixed(1)} pts</span>
                             </div>
                           ))
-                      : driverPerformance
-                          .sort((a, b) => b.points - a.points)
-                          .slice(0, 5)
+                      : getAggregatedData(driverPerformance, 'driverId', 'driver_name', 'points')
                           .map((driver, index) => (
-                            <div key={index} className="flex justify-between items-center py-3 px-4 bg-gray-50 rounded-lg border border-gray-200">
-                              <span className="font-semibold text-black text-lg">{index + 1}. {driver.driver_name}</span>
-                              <span className="font-bold text-black text-lg">{driver.points.toFixed(1)} pts</span>
+                            <div key={driver.name} className="flex justify-between items-center py-3 px-4 bg-gray-50 rounded-lg border border-gray-200">
+                              <span className="font-semibold text-neutral-800 text-lg">{index + 1}. {driver.name}</span>
+                              <span className="font-bold text-neutral-900 text-lg">{driver.totalValue.toFixed(1)} pts</span>
                             </div>
                           ))
                     }
@@ -760,13 +686,13 @@ export default function AnalyticsDashboard() {
 
               {/* Top Teams */}
               {!selectedDriver && teamStandings.length > 0 && (
-                <div className="bg-white p-8 rounded-xl shadow-lg border-2 border-gray-300">
+                <div className="bg-white p-8 rounded-xl shadow-lg border-2 border-gray-200">
                   <div className="flex items-center mb-6">
-                    <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center mr-3">
+                    <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center mr-3">
                       <span className="text-white text-lg">🏭</span>
                     </div>
-                    <h3 className="text-2xl font-bold text-black">
-                      {selectedTeam ? 'Team Performance' : 'Top Teams'}
+                    <h3 className="text-2xl font-bold text-neutral-900">
+                      {selectedTeam ? 'Team Performance' : 'Top Teams (All-Time)'}
                     </h3>
                   </div>
                   <div className="space-y-4">
@@ -776,17 +702,15 @@ export default function AnalyticsDashboard() {
                           .slice(0, 5)
                           .map((team, index) => (
                             <div key={index} className="flex justify-between items-center py-3 px-4 bg-gray-50 rounded-lg border border-gray-200">
-                              <span className="font-semibold text-black text-lg">{team.year}</span>
-                              <span className="font-bold text-black text-lg">{team.points} pts</span>
+                              <span className="font-semibold text-neutral-800 text-lg">{team.year}</span>
+                              <span className="font-bold text-neutral-900 text-lg">{team.points} pts</span>
                             </div>
                           ))
-                      : teamStandings
-                          .sort((a, b) => b.points - a.points)
-                          .slice(0, 5)
+                      : getAggregatedData(teamStandings, 'constructorId', 'name', 'points')
                           .map((team, index) => (
                             <div key={index} className="flex justify-between items-center py-3 px-4 bg-gray-50 rounded-lg border border-gray-200">
-                              <span className="font-semibold text-black text-lg">{index + 1}. {team.name}</span>
-                              <span className="font-bold text-black text-lg">{team.points} pts</span>
+                              <span className="font-semibold text-neutral-800 text-lg">{index + 1}. {team.name}</span>
+                              <span className="font-bold text-neutral-900 text-lg">{team.totalValue} pts</span>
                             </div>
                           ))
                     }
@@ -796,13 +720,13 @@ export default function AnalyticsDashboard() {
 
               {/* Most Podiums */}
               {!selectedTeam && podiumData.length > 0 && (
-                <div className="bg-white p-8 rounded-xl shadow-lg border-2 border-gray-300">
+                <div className="bg-white p-8 rounded-xl shadow-lg border-2 border-gray-200">
                   <div className="flex items-center mb-6">
-                    <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center mr-3">
+                    <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center mr-3">
                       <span className="text-white text-lg">🏆</span>
                     </div>
-                    <h3 className="text-2xl font-bold text-black">
-                      {selectedDriver ? 'Driver Podiums' : 'Most Podiums'}
+                    <h3 className="text-2xl font-bold text-neutral-900">
+                      {selectedDriver ? 'Driver Podiums' : 'Most Podiums (All-Time)'}
                     </h3>
                   </div>
                   <div className="space-y-4">
@@ -812,17 +736,15 @@ export default function AnalyticsDashboard() {
                           .slice(0, 5)
                           .map((driver, index) => (
                             <div key={index} className="flex justify-between items-center py-3 px-4 bg-gray-50 rounded-lg border border-gray-200">
-                              <span className="font-semibold text-black text-lg">{driver.year}</span>
-                              <span className="font-bold text-black text-lg">{driver.podiums} podiums</span>
+                              <span className="font-semibold text-neutral-800 text-lg">{driver.year}</span>
+                              <span className="font-bold text-neutral-900 text-lg">{driver.podiums} podiums</span>
                             </div>
                           ))
-                      : podiumData
-                          .sort((a, b) => b.podiums - a.podiums)
-                          .slice(0, 5)
+                      : getAggregatedData(podiumData, 'driverId', 'driver_name', 'podiums')
                           .map((driver, index) => (
-                            <div key={index} className="flex justify-between items-center py-3 px-4 bg-gray-50 rounded-lg border border-gray-200">
-                              <span className="font-semibold text-black text-lg">{index + 1}. {driver.driver_name}</span>
-                              <span className="font-bold text-black text-lg">{driver.podiums} podiums</span>
+                            <div key={driver.name} className="flex justify-between items-center py-3 px-4 bg-gray-50 rounded-lg border border-gray-200">
+                              <span className="font-semibold text-neutral-800 text-lg">{index + 1}. {driver.name}</span>
+                              <span className="font-bold text-neutral-900 text-lg">{driver.totalValue} podiums</span>
                             </div>
                           ))
                     }

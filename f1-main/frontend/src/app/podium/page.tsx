@@ -21,6 +21,40 @@ interface PredictionResult {
   confidence: string;
 }
 
+// New React-Select styles for the F1 theme
+const f1SelectStyles = {
+  control: (provided) => ({
+    ...provided,
+    border: '2px solid var(--border-color)',
+    borderRadius: '8px',
+    padding: '6px', // Adjusted padding
+    fontSize: '1rem',
+    fontWeight: '500',
+    backgroundColor: 'var(--card-bg)',
+    color: 'var(--foreground)',
+    minHeight: '52px',
+    boxShadow: 'none',
+    transition: 'all 0.3s ease',
+    '&:hover': {
+      borderColor: '#9ca3af',
+    }
+  }),
+  option: (provided, state) => ({
+    ...provided,
+    backgroundColor: state.isSelected ? 'var(--primary)' : state.isFocused ? '#fdecec' : 'var(--card-bg)',
+    color: state.isSelected ? 'white' : 'var(--foreground)',
+    fontWeight: '500',
+  }),
+  singleValue: (provided) => ({
+    ...provided,
+    color: 'var(--foreground)',
+  }),
+  placeholder: (provided) => ({
+    ...provided,
+    color: '#6b7280',
+  }),
+};
+
 export default function PodiumPrediction() {
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [constructors, setConstructors] = useState<Constructor[]>([]);
@@ -81,12 +115,13 @@ export default function PodiumPrediction() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 to-gray-200">
+    // Uses the new --background from globals.css
+    <div className="min-h-screen">
       <div className="container mx-auto px-6 py-12">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="mb-8">
-            <Link href="/" className="inline-flex items-center text-black hover:text-gray-700 font-semibold text-lg transition-colors">
+            <Link href="/" className="inline-flex items-center text-neutral-800 hover:text-red-600 font-semibold text-lg transition-colors">
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
@@ -94,23 +129,24 @@ export default function PodiumPrediction() {
             </Link>
           </div>
 
-          {/* Main Content */}
-          <div className="bg-white rounded-2xl shadow-2xl p-10 border border-gray-300">
+          {/* Main Content Card */}
+          <div className="f1-card p-10">
             {/* Title */}
             <div className="text-center mb-12">
-              <h1 className="text-5xl font-bold text-black mb-4 tracking-tight">
+              <h1 className="text-5xl font-bold text-neutral-900 mb-4 tracking-tight">
                 Podium Prediction
               </h1>
-              <div className="w-24 h-1 bg-black mx-auto rounded-full"></div>
+              {/* F1 Red Underline */}
+              <div className="w-24 h-1 bg-red-600 mx-auto rounded-full"></div>
             </div>
 
             {/* Prediction Form */}
             <div className="mb-12">
               <div className="text-center mb-10">
-                <h2 className="text-3xl font-bold text-black mb-3">
+                <h2 className="text-3xl font-bold text-neutral-900 mb-3">
                   Race Prediction Tool
                 </h2>
-                <p className="text-black text-lg font-medium">
+                <p className="text-neutral-700 text-lg font-medium">
                   Predict podium finishes based on driver, team, and grid position
                 </p>
               </div>
@@ -118,87 +154,38 @@ export default function PodiumPrediction() {
               <form onSubmit={handleSubmit} className="space-y-10">
                 <div className="grid lg:grid-cols-3 gap-8">
                   <div className="space-y-3">
-                    <label className="block text-lg font-bold text-black">
+                    <label className="block text-lg font-bold text-neutral-900">
                       Driver
                     </label>
                     <Select
                       value={selectedDriver}
                       onChange={setSelectedDriver}
                       options={drivers.map(driver => ({ value: driver.driverId, label: driver.name }))}
-                      placeholder="Search and select a driver..."
+                      placeholder="Select a driver..."
                       className="text-lg"
-                      styles={{
-                        control: (provided) => ({
-                          ...provided,
-                          border: '2px solid #d1d5db',
-                          borderRadius: '0.75rem',
-                          padding: '0.5rem',
-                          fontSize: '1.125rem',
-                          fontWeight: '500',
-                          backgroundColor: 'white',
-                          color: 'black',
-                          minHeight: '3.5rem'
-                        }),
-                        option: (provided, state) => ({
-                          ...provided,
-                          backgroundColor: state.isSelected ? '#000000' : state.isFocused ? '#f3f4f6' : 'white',
-                          color: state.isSelected ? 'white' : 'black',
-                          fontWeight: '500'
-                        }),
-                        singleValue: (provided) => ({
-                          ...provided,
-                          color: 'black'
-                        }),
-                        placeholder: (provided) => ({
-                          ...provided,
-                          color: '#6b7280'
-                        })
-                      }}
+                      styles={f1SelectStyles}
+                      // Apply focus styles to the control wrapper
+                      classNamePrefix="f1-select" 
                     />
                   </div>
 
                   <div className="space-y-3">
-                    <label className="block text-lg font-bold text-black">
+                    <label className="block text-lg font-bold text-neutral-900">
                       Constructor/Team
                     </label>
                     <Select
                       value={selectedConstructor}
                       onChange={setSelectedConstructor}
                       options={constructors.map(constructor => ({ value: constructor.constructorId, label: constructor.name }))}
-                      placeholder="Search and select a constructor..."
+                      placeholder="Select a constructor..."
                       className="text-lg"
-                      styles={{
-                        control: (provided) => ({
-                          ...provided,
-                          border: '2px solid #d1d5db',
-                          borderRadius: '0.75rem',
-                          padding: '0.5rem',
-                          fontSize: '1.125rem',
-                          fontWeight: '500',
-                          backgroundColor: 'white',
-                          color: 'black',
-                          minHeight: '3.5rem'
-                        }),
-                        option: (provided, state) => ({
-                          ...provided,
-                          backgroundColor: state.isSelected ? '#000000' : state.isFocused ? '#f3f4f6' : 'white',
-                          color: state.isSelected ? 'white' : 'black',
-                          fontWeight: '500'
-                        }),
-                        singleValue: (provided) => ({
-                          ...provided,
-                          color: 'black'
-                        }),
-                        placeholder: (provided) => ({
-                          ...provided,
-                          color: '#6b7280'
-                        })
-                      }}
+                      styles={f1SelectStyles}
+                      classNamePrefix="f1-select"
                     />
                   </div>
 
                   <div className="space-y-3">
-                    <label className="block text-lg font-bold text-black">
+                    <label className="block text-lg font-bold text-neutral-900">
                       Grid Position
                     </label>
                     <input
@@ -207,7 +194,7 @@ export default function PodiumPrediction() {
                       max="20"
                       value={gridPosition}
                       onChange={(e) => setGridPosition(Number(e.target.value))}
-                      className="w-full px-6 py-4 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-black focus:border-black bg-white text-black font-medium text-lg transition-all"
+                      className="f1-input" // Use new global input style
                       placeholder="Enter grid position"
                       required
                     />
@@ -218,7 +205,7 @@ export default function PodiumPrediction() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="bg-black text-white px-12 py-5 rounded-xl hover:bg-gray-800 focus:outline-none focus:ring-4 focus:ring-black focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed font-bold text-xl transition-all transform hover:scale-105 shadow-lg"
+                    className="f1-button-primary text-xl" // Use new global button style
                   >
                     {loading ? (
                       <span className="flex items-center">
@@ -247,27 +234,27 @@ export default function PodiumPrediction() {
             {result && (
               <div className="p-8 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border-2 border-green-300">
                 <div className="text-center mb-8">
-                  <h2 className="text-3xl font-bold text-black mb-2">Prediction Results</h2>
-                  <div className="w-16 h-1 bg-black mx-auto rounded-full"></div>
+                  <h2 className="text-3xl font-bold text-neutral-900 mb-2">Prediction Results</h2>
+                  <div className="w-16 h-1 bg-green-600 mx-auto rounded-full"></div>
                 </div>
 
                 <div className="space-y-6">
-                  <div className="flex justify-between items-center py-4 px-6 bg-white rounded-lg border-2 border-gray-300 shadow-sm">
-                    <span className="font-bold text-black text-xl">Podium Finish:</span>
+                  <div className="flex justify-between items-center py-4 px-6 bg-white rounded-lg border-2 border-gray-200 shadow-sm">
+                    <span className="font-bold text-neutral-800 text-xl">Podium Finish:</span>
                     <span className={`font-black text-2xl ${result.prediction === 1 ? 'text-green-700' : 'text-red-700'}`}>
                       {result.prediction === 1 ? 'Yes' : 'No'}
                     </span>
                   </div>
 
-                  <div className="flex justify-between items-center py-4 px-6 bg-white rounded-lg border-2 border-gray-300 shadow-sm">
-                    <span className="font-bold text-black text-xl">Podium Probability:</span>
-                    <span className="font-black text-2xl text-black">
+                  <div className="flex justify-between items-center py-4 px-6 bg-white rounded-lg border-2 border-gray-200 shadow-sm">
+                    <span className="font-bold text-neutral-800 text-xl">Podium Probability:</span>
+                    <span className="font-black text-2xl text-neutral-900">
                       {(result.podium_probability * 100).toFixed(1)}%
                     </span>
                   </div>
 
-                  <div className="flex justify-between items-center py-4 px-6 bg-white rounded-lg border-2 border-gray-300 shadow-sm">
-                    <span className="font-bold text-black text-xl">Confidence Level:</span>
+                  <div className="flex justify-between items-center py-4 px-6 bg-white rounded-lg border-2 border-gray-200 shadow-sm">
+                    <span className="font-bold text-neutral-800 text-xl">Confidence Level:</span>
                     <span className={`font-black text-2xl ${result.confidence === 'high' ? 'text-green-700' : result.confidence === 'medium' ? 'text-yellow-700' : 'text-red-700'}`}>
                       {result.confidence.charAt(0).toUpperCase() + result.confidence.slice(1)}
                     </span>
