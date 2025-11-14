@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 
 // This is the URL where your LM Studio server is running
-// As seen in your screenshot, it's http://localhost:1234
 const LM_STUDIO_URL = 'http://localhost:1234/v1/chat/completions';
 
 export async function POST(request: Request) {
@@ -15,21 +14,25 @@ export async function POST(request: Request) {
       );
     }
 
-    // This prompt guides the AI to be an F1 expert.
+    // This prompt guides the AI to be an F1 expert AND use HTML
     const systemPrompt =
-      "You are an expert on Formula 1 (F1) history. Answer the user's questions about F1 seasons, race winners, driver championships, constructor scores, and other related trivia. Be concise and accurate.";
+      "You are an expert on Formula 1 (F1) history. Answer the user's questions. " +
+      "When you provide tabular data, like a scorecard or standings, YOU MUST use HTML table tags (<table>, <thead>, <tbody>, <tr>, <th>, <td>). " +
+      "For emphasis, use <strong>bold tags</strong> instead of markdown. " +
+      "**CRITICAL:** Do NOT wrap the HTML <table> in markdown code blocks (like ```html). Send the raw <table>...</table> as part of your response." +
+      "Be concise and accurate.";
+
 
     // Format the request for the OpenAI-compatible LM Studio API
     const requestBody = {
-      // NOTE: Your image shows 'gemma-2-9b-it'. 
-      // Replace this if you are using a different model file.
+      // NOTE: Replace this with your model's name if different
       model: 'gemma-2-9b-it',
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: message },
       ],
       temperature: 0.7,
-      stream: false, // We'll keep it simple with non-streaming for now
+      stream: false, 
     };
 
     // Send the request to LM Studio

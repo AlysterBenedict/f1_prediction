@@ -2,7 +2,6 @@
 
 import React, { useState, FormEvent, useRef, useEffect } from 'react';
 
-// Define the structure of a message
 interface Message {
   role: 'user' | 'bot';
   content: string;
@@ -10,36 +9,52 @@ interface Message {
 
 const Chatbot: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>([
+    { role: 'bot', content: "Hi! I'm the F1 Predictor Bot. Ask me about podiums or championships!" }
+  ]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Scroll to the bottom of the message list whenever messages change
+  const suggestions = [
+    "Explain the technical terms and rules of F1?",
+    "Score card for 2023"
+  ];
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   useEffect(scrollToBottom, [messages]);
 
-  // Handle the form submission (when user sends a message)
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!inputValue.trim()) return;
+  const handleSubmit = async (e: FormEvent | string) => {
+    let message: string;
 
-    const userMessage: Message = { role: 'user', content: inputValue };
+    if (typeof e === 'string') {
+      message = e;
+    } else {
+      e.preventDefault();
+      message = inputValue;
+    }
+    
+    if (!message.trim()) return;
+
+    const userMessage: Message = { role: 'user', content: message };
     setMessages((prev) => [...prev, userMessage]);
-    setInputValue('');
+
+    if (typeof e !== 'string') {
+      setInputValue('');
+    }
+    
     setIsLoading(true);
 
     try {
-      // Send the user's message to our new API route
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message: inputValue }),
+        body: JSON.stringify({ message: message }),
       });
 
       if (!response.ok) {
@@ -63,18 +78,17 @@ const Chatbot: React.FC = () => {
 
   return (
     <>
-      {/* The Chat Popup Button */}
+      {/* Chat Popup Button with Enhanced Design */}
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
           className="chat-popup-button"
-          title="Open F1 Chat"
+          title="Open F1 Chat Assistant"
         >
-          {/* Simple Chat Icon (SVG) */}
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
+            width="28"
+            height="28"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -87,14 +101,14 @@ const Chatbot: React.FC = () => {
         </button>
       )}
 
-      {/* The Chat Window */}
+      {/* Chat Window with Enhanced Glassmorphism */}
       {isOpen && (
         <div className="chat-window">
-          {/* Header */}
+          {/* Header with Gradient */}
           <div className="chat-header">
             <h3>F1 Chat Assistant</h3>
             <button onClick={() => setIsOpen(false)} title="Close Chat">
-              &times;
+              ×
             </button>
           </div>
 
@@ -102,17 +116,41 @@ const Chatbot: React.FC = () => {
           <div className="chat-messages">
             {messages.map((msg, index) => (
               <div key={index} className={`message ${msg.role}`}>
-                <p>{msg.content}</p>
+                <div 
+                  className="message-content" 
+                  dangerouslySetInnerHTML={{ 
+                    __html: msg.content
+                      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                      .replace(/\n/g, '<br />')
+                  }} 
+                />
               </div>
             ))}
             {isLoading && (
               <div className="message bot">
-                <p><i>Thinking...</i></p>
+                 <div className="typing-indicator">
+                  <span></span><span></span><span></span>
+                </div>
               </div>
             )}
-            {/* Empty div to force scroll to bottom */}
             <div ref={messagesEndRef} />
           </div>
+
+          {/* Suggestions Container */}
+          {messages.length === 1 && !isLoading && (
+            <div className="suggestions-container">
+              {suggestions.map((text, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  className="suggestion-button"
+                  onClick={() => handleSubmit(text)}
+                >
+                  {text}
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* Input Form */}
           <form onSubmit={handleSubmit} className="chat-form">
@@ -125,7 +163,17 @@ const Chatbot: React.FC = () => {
               disabled={isLoading}
             />
             <button type="submit" className="chat-send" disabled={isLoading}>
-              Send
+              {isLoading ? (
+                <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="22" y1="2" x2="11" y2="13"></line>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+              )}
             </button>
           </form>
         </div>
